@@ -1,0 +1,20 @@
+#!/bin/bash
+function run_tests {
+    echo "running tests"
+    find ./ -name '*.pyc' -exec rm {} \;
+    nosetests --process-restartworker --stop -v \
+    --with-coverage \
+    --cover-erase \
+    --cover-package=libutils.file_utils
+    test_status=$?
+}
+
+function main {
+    run_tests
+    rm .coverage
+    find ./ -name '*.pyc' -exec rm {} \;
+}
+
+echo "Running all tests"
+time main
+exit $test_status
