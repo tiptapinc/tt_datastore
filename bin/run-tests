@@ -1,18 +1,22 @@
 #!/bin/bash
+function remove_pyc {
+    find ./ -name '*.pyc' -exec rm {} \;
+}
+
 function run_tests {
     echo "running tests"
-    find ./ -name '*.pyc' -exec rm {} \;
+    remove_pyc
     nosetests --process-restartworker --stop -v \
     --with-coverage \
     --cover-erase \
-    --cover-package=libutils.file_utils
+    --cover-package=tt_datastore
     test_status=$?
 }
 
 function main {
-    run_tests
+    time run_tests
     rm .coverage
-    find ./ -name '*.pyc' -exec rm {} \;
+    remove_pyc
 }
 
 echo "Running all tests"
