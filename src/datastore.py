@@ -1,7 +1,6 @@
 import json
 import sys
 import logging
-logging.basicConfig()
 log = logging.getLogger(__name__)
 
 import couchbase

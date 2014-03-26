@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: tt-datastore
-Version: 0.0.1
+Version: 0.0.2
 Summary: TipTap datastore library.
 Home-page: UNKNOWN
 Author: TipTap
@@ -8,6 +8,11 @@ Author-email: UNKNOWN
 License: UNKNOWN
 Description: tt_datastore
         =========
+        
+        ## v0.0.2:
+        
+        * removed call to logging.basicConfig()
+        
         
         ## v0.0.1:
         
