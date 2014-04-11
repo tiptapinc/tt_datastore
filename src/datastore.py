@@ -1,4 +1,3 @@
-import json
 import sys
 import logging
 log = logging.getLogger(__name__)
@@ -10,7 +9,8 @@ from couchbase.exceptions import NotFoundError
 class ClientBase(object):
     shortcut = None
 
-    def __init__(self, host, port, account, accountPassword, database, databasePassword):
+    def __init__(self, host, port, account, accountPassword,
+                 database, databasePassword):
         pass
 
     def create(self):
@@ -25,12 +25,19 @@ class ClientBase(object):
     def delete(self):
         pass
 
-class ClientCouchbase(ClientBase):
-    shortcut= "couchbase"
 
-    def __init__(self, host, port, account, accountPassword, database, databasePassword):
+class ClientCouchbase(ClientBase):
+    shortcut = "couchbase"
+
+    def __init__(self, host, port, account, accountPassword,
+                 database, databasePassword):
         try:
-            self.connection = couchbase.Couchbase.connect(host=host, port=port, bucket=database, password=databasePassword)
+            self.connection = couchbase.Couchbase.connect(
+                host=host,
+                port=port,
+                bucket=database,
+                password=databasePassword
+            )
         except:
             error = sys.exc_info()
             log.error("unexpected error, %s, %s" % (error[0], error[1]))
@@ -58,7 +65,7 @@ class ClientCouchbase(ClientBase):
     def update(self, key, value):
         try:
             self.connection.get(key)
-            self.connection.set(key,value)
+            self.connection.set(key, value)
             return True
         except NotFoundError:
             return False
@@ -78,20 +85,36 @@ class ClientCouchbase(ClientBase):
             log.error("unexpected error, %s, %s" % (error[0], error[1]))
             return False
 
-    def view(self, design, view):
-        return client.query(design, view)
+    def view(self, design, view, **kwargs):
+        return self.connection.query(design, view, **kwargs)
+
 
 class Datastore(object):
     client = None
 
-    def __init__(self, clientType, database=None, databasePassword=None, host="localhost", port=8091, account=None, accountPassword=None):
+    def __init__(self, clientType, database=None, databasePassword=None,
+                 host="localhost", port=8091, account=None,
+                 accountPassword=None):
+
         clientTypes = ClientBase.__subclasses__()
         for ct in clientTypes:
-            #two checks: one for clientType as a class (ex: ClientCouchbase), one for clientType as a string ("couchbase")
-            if ct == clientType or ct.__name__ == clientType or ct.shortcut == clientType:
-                self.client = ct(host=host, port=port, account=account, accountPassword=accountPassword, database=database, databasePassword=databasePassword)
+            # two checks: one for clientType as a class (ex: ClientCouchbase),
+            # one for clientType as a string ("couchbase")
+            if (
+                ct == clientType or
+                ct.__name__ == clientType or
+                ct.shortcut == clientType
+            ):
+                self.client = ct(
+                    host=host,
+                    port=port,
+                    account=account,
+                    accountPassword=accountPassword,
+                    database=database,
+                    databasePassword=databasePassword
+                )
 
-        if self.client == None:
+        if self.client is None:
             raise ClientTypeNotFound(clientType)
 
     def create(self, key, value):
@@ -106,8 +129,8 @@ class Datastore(object):
     def delete(self, key):
         return self.client.delete(key)
 
-    def view(self, design, view):
-        self.client.query(design, view)
+    def view(self, design, view, **kwargs):
+        return self.client.view(design, view, **kwargs)
 
 
 class ClientTypeNotFound(Exception):
@@ -116,11 +139,11 @@ class ClientTypeNotFound(Exception):
         clientsString = ""
         for c in clientsArray:
             clientsString += "\n%s" % (str(c.__name__))
-        
-        self.message = "\nCould not find the client type: %s. \
-                       \nIf you need it, here is a list of the available client types: %s\n" \
-                        % (clientType, clientsString)
+
+        self.message = "\nCould not find the client type: %s. " \
+                       "\nIf you need it, here is a list of the " \
+                       "available client types: %s\n" % \
+                       (clientType, clientsString)
+
     def __str__(self):
         return self.message
-
-           
