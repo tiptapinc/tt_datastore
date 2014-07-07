@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: tt-datastore
-Version: 0.0.3
+Version: 0.0.4
 Summary: TipTap datastore library.
 Home-page: UNKNOWN
 Author: TipTap
@@ -8,6 +8,13 @@ Author-email: UNKNOWN
 License: UNKNOWN
 Description: tt_datastore
         =========
+        
+        ## v0.0.4:
+        
+        * removed "account" and "accountPassword" arguments
+        * added "set" operation
+        * eliminated unneccessary "try-except" clauses
+        * added traceback to "except" clauses
         
         ## v0.0.3:
         

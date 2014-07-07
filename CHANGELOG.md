@@ -1,3 +1,10 @@
+## v0.0.4:
+
+* removed "account" and "accountPassword" arguments
+* added "set" operation
+* eliminated unneccessary "try-except" clauses
+* added traceback to "except" clauses
+
 ## v0.0.3:
 
 * cosmetic cleanups suggested by PEP-8 linter

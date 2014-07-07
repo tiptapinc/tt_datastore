@@ -1,4 +1,5 @@
-import sys
+import traceback
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -9,8 +10,7 @@ from couchbase.exceptions import NotFoundError
 class ClientBase(object):
     shortcut = None
 
-    def __init__(self, host, port, account, accountPassword,
-                 database, databasePassword):
+    def __init__(self, host, port, database, databasePassword):
         pass
 
     def create(self):
@@ -29,26 +29,20 @@ class ClientBase(object):
 class ClientCouchbase(ClientBase):
     shortcut = "couchbase"
 
-    def __init__(self, host, port, account, accountPassword,
-                 database, databasePassword):
-        try:
-            self.connection = couchbase.Couchbase.connect(
-                host=host,
-                port=port,
-                bucket=database,
-                password=databasePassword
-            )
-        except:
-            error = sys.exc_info()
-            log.error("unexpected error, %s, %s" % (error[0], error[1]))
+    def __init__(self, host, port, database, databasePassword):
+        self.connection = couchbase.Couchbase.connect(
+            host=host,
+            port=port,
+            bucket=database,
+            password=databasePassword
+        )
 
     def create(self, key, value):
         try:
             self.connection.add(key, value)
             return True
         except:
-            error = sys.exc_info()
-            log.error("unexpected error, %s, %s" % (error[0], error[1]))
+            log.error("unexpected error, %s" % traceback.format_exc())
             return False
 
     def read(self, key):
@@ -58,20 +52,25 @@ class ClientCouchbase(ClientBase):
         except NotFoundError:
             return False
         except:
-            error = sys.exc_info()
-            log.error("unexpected error, %s, %s" % (error[0], error[1]))
+            log.error("unexpected error, %s" % traceback.format_exc())
             return None
 
     def update(self, key, value):
         try:
-            self.connection.get(key)
-            self.connection.set(key, value)
+            self.connection.replace(key, value)
             return True
         except NotFoundError:
             return False
         except:
-            error = sys.exc_info()
-            log.error("unexpected error, %s, %s" % (error[0], error[1]))
+            log.error("unexpected error, %s" % traceback.format_exc())
+            return False
+
+    def set(self, key, value):
+        try:
+            self.connection.set(key, value)
+            return True
+        except:
+            log.error("unexpected error, %s" % traceback.format_exc())
             return False
 
     def delete(self, key):
@@ -81,8 +80,7 @@ class ClientCouchbase(ClientBase):
         except NotFoundError:
             return False
         except:
-            error = sys.exc_info()
-            log.error("unexpected error, %s, %s" % (error[0], error[1]))
+            log.error("unexpected error, %s" % traceback.format_exc())
             return False
 
     def view(self, design, view, **kwargs):
@@ -93,8 +91,7 @@ class Datastore(object):
     client = None
 
     def __init__(self, clientType, database=None, databasePassword=None,
-                 host="localhost", port=8091, account=None,
-                 accountPassword=None):
+                 host="localhost", port=8091):
 
         clientTypes = ClientBase.__subclasses__()
         for ct in clientTypes:
@@ -108,8 +105,6 @@ class Datastore(object):
                 self.client = ct(
                     host=host,
                     port=port,
-                    account=account,
-                    accountPassword=accountPassword,
                     database=database,
                     databasePassword=databasePassword
                 )
@@ -125,6 +120,9 @@ class Datastore(object):
 
     def update(self, key, value):
         return self.client.update(key, value)
+
+    def set(self, key, value):
+        return self.client.set(key, value)
 
     def delete(self, key):
         return self.client.delete(key)
