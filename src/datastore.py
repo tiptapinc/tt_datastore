@@ -1,3 +1,4 @@
+import json
 import traceback
 
 import logging
@@ -29,7 +30,12 @@ class ClientBase(object):
 class ClientCouchbase(ClientBase):
     shortcut = "couchbase"
 
-    def __init__(self, host, port, database, databasePassword):
+    def __init__(self, host, port, database, databasePassword,
+                 jsonEncoder=None):
+
+        if jsonEncoder:
+            couchbase.set_json_converters(jsonEncoder, json.loads)
+
         self.connection = couchbase.Couchbase.connect(
             host=host,
             port=port,
@@ -91,7 +97,7 @@ class Datastore(object):
     client = None
 
     def __init__(self, clientType, database=None, databasePassword=None,
-                 host="localhost", port=8091):
+                 host="localhost", port=8091, **kwargs):
 
         clientTypes = ClientBase.__subclasses__()
         for ct in clientTypes:
@@ -106,7 +112,8 @@ class Datastore(object):
                     host=host,
                     port=port,
                     database=database,
-                    databasePassword=databasePassword
+                    databasePassword=databasePassword,
+                    **kwargs
                 )
 
         if self.client is None:

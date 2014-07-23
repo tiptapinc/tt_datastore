@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: tt-datastore
-Version: 0.0.4
+Version: 0.0.5
 Summary: TipTap datastore library.
 Home-page: UNKNOWN
 Author: TipTap
@@ -8,6 +8,11 @@ Author-email: UNKNOWN
 License: UNKNOWN
 Description: tt_datastore
         =========
+        
+        ## v0.0.5:
+        
+        * added ability to set global json encoder when creating
+          a Couchbase datastore
         
         ## v0.0.4:
         

@@ -1,3 +1,8 @@
+## v0.0.5:
+
+* added ability to set global json encoder when creating
+  a Couchbase datastore
+
 ## v0.0.4:
 
 * removed "account" and "accountPassword" arguments
