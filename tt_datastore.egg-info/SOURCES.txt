@@ -5,6 +5,7 @@ VERSION
 setup.py
 src/__init__.py
 src/datastore.py
+src/old_datastore.py
 tt_datastore.egg-info/PKG-INFO
 tt_datastore.egg-info/SOURCES.txt
 tt_datastore.egg-info/dependency_links.txt

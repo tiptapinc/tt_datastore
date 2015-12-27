@@ -1,3 +1,7 @@
+## v0.0.6:
+* use couchbase.bucket instead of deprecated couchbase.connection
+* add get_multi, design_get, and design_create methods
+
 ## v0.0.5:
 
 * added ability to set global json encoder when creating
