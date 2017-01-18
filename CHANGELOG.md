@@ -1,3 +1,12 @@
+## v0.0.8
+* added lock method
+
+## v0.0.7:
+* set 'quiet' to True for Bucket
+* remove exception handling
+* add **kwargs to create, read, update, set, delete, get_multi methods
+* add read_with_cas method
+
 ## v0.0.6:
 * use couchbase.bucket instead of deprecated couchbase.connection
 * add get_multi, design_get, and design_create methods

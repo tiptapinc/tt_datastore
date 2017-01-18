@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: tt-datastore
-Version: 0.0.6
+Version: 0.0.8
 Summary: TipTap datastore library.
 Home-page: UNKNOWN
 Author: TipTap
@@ -8,6 +8,15 @@ Author-email: UNKNOWN
 License: UNKNOWN
 Description: tt_datastore
         =========
+        
+        ## v0.0.8
+        * added lock method
+        
+        ## v0.0.7:
+        * set 'quiet' to True for Bucket
+        * remove exception handling
+        * add **kwargs to create, read, update, set, delete, get_multi methods
+        * add read_with_cas method
         
         ## v0.0.6:
         * use couchbase.bucket instead of deprecated couchbase.connection

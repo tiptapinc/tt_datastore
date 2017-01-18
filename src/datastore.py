@@ -1,71 +1,52 @@
-import traceback
+from couchbase.bucket import Bucket
 
 import logging
 log = logging.getLogger(__name__)
-
-from couchbase.bucket import Bucket
-from couchbase.exceptions import NotFoundError, KeyExistsError
 
 
 class Datastore(object):
 
     def __init__(self, host, port, bucket, **kwargs):
         connectionString = "http://%s:%s/%s" % (host, port, bucket)
+        kwargs['quiet'] = True
         self.bucket = Bucket(connectionString, **kwargs)
 
-    def create(self, key, value):
-        try:
-            self.bucket.insert(key, value)
-            return True
-        except KeyExistsError:
-            return False
-        except:
-            log.error("unexpected error, %s" % traceback.format_exc())
-            return False
+    def create(self, key, value, **kwargs):
+        ro = self.bucket.insert(key, value, **kwargs)
+        return ro.success
 
-    def read(self, key):
-        try:
-            doc = self.bucket.get(key)
-            return doc.value
-        except NotFoundError:
-            return False
-        except:
-            log.error("unexpected error, %s" % traceback.format_exc())
-            return None
+    def read(self, key, **kwargs):
+        rv = self.bucket.get(key, **kwargs)
+        return rv.value
 
-    def update(self, key, value):
-        try:
-            self.bucket.replace(key, value)
-            return True
-        except NotFoundError:
-            return False
-        except:
-            log.error("unexpected error, %s" % traceback.format_exc())
-            return False
+    def read_with_cas(self, key, **kwargs):
+        rv = self.bucket.get(key, **kwargs)
+        return rv.value, rv.cas
 
-    def set(self, key, value):
-        try:
-            self.bucket.upsert(key, value)
-            return True
-        except:
-            log.error("unexpected error, %s" % traceback.format_exc())
-            return False
+    def lock(self, key, **kwargs):
+        rv = self.bucket.lock(key, **kwargs)
+        return rv.value, rv.cas
 
-    def delete(self, key):
-        try:
-            self.bucket.remove(key)
-            return True
-        except NotFoundError:
-            return False
-        except:
-            log.error("unexpected error, %s" % traceback.format_exc())
-            return False
+    def unlock(self, key, cas):
+        self.bucket.unlock(key, cas)
+
+    def update(self, key, value, **kwargs):
+        ro = self.bucket.replace(key, value, **kwargs)
+        return ro.success
+
+    def set(self, key, value, **kwargs):
+        ro = self.bucket.upsert(key, value, **kwargs)
+        return ro.success
+
+    def delete(self, key, **kwargs):
+        ro = self.bucket.remove(key, **kwargs)
+        return ro.success
 
     def view(self, design, view, **kwargs):
         return self.bucket.query(design, view, **kwargs)
 
-    def get_multi(self, keys):
-        return self.bucket.get_multi(keys)
+    def get_multi(self, keys, **kwargs):
+        return self.bucket.get_multi(keys, **kwargs)
 
     def design_get(self, name, **kwargs):
         return self.bucket.bucket_manager().design_get(name, **kwargs)
