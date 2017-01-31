@@ -1,5 +1,5 @@
 ## v0.0.8
-* added lock method
+* added lock and unlock methods
 
 ## v0.0.7:
 * set 'quiet' to True for Bucket
