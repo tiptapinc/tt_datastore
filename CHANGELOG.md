@@ -1,3 +1,12 @@
+## v0.0.11
+* lock required couchbase version
+
+## v0.0.10
+* add update_with_cas and set_with_cas methods
+
+## v0.0.9
+* restore NotFoundError
+
 ## v0.0.8
 * added lock and unlock methods
 

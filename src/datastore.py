@@ -1,5 +1,8 @@
 from couchbase.bucket import Bucket
 
+# ignore linter! do not delete!
+from couchbase.exceptions import NotFoundError
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -34,9 +37,17 @@ class Datastore(object):
         ro = self.bucket.replace(key, value, **kwargs)
         return ro.success
 
+    def update_with_cas(self, key, value, **kwargs):
+        ro = self.bucket.replace(key, value, **kwargs)
+        return ro.success, ro.cas
+
     def set(self, key, value, **kwargs):
         ro = self.bucket.upsert(key, value, **kwargs)
         return ro.success
+
+    def set_with_cas(self, key, value, **kwargs):
+        ro = self.bucket.upsert(key, value, **kwargs)
+        return ro.success, ro.cas
 
     def delete(self, key, **kwargs):
         ro = self.bucket.remove(key, **kwargs)
