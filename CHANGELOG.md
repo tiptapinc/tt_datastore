@@ -1,3 +1,6 @@
+## v0.0.12
+* added support for python 3
+
 ## v0.0.11
 * lock required couchbase version
 
