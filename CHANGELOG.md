@@ -1,3 +1,11 @@
+## v0.0.14
+* remove NotFoundError again for couchbase 3.0
+
+## v0.0.13
+* switch to couchbase version that supports Role-Based Access Control (RBAC)
+* requires couchbase v2.2.6 or higher
+* not backward compatible with previous tt_datastore
+
 ## v0.0.12
 * added support for python 3
 

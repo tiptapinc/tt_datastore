@@ -1,7 +1,5 @@
-from couchbase.bucket import Bucket
-
-# ignore linter! do not delete!
-from couchbase.exceptions import NotFoundError
+from couchbase.cluster import Cluster
+from couchbase.cluster import PasswordAuthenticator
 
 import logging
 log = logging.getLogger(__name__)
@@ -9,10 +7,12 @@ log = logging.getLogger(__name__)
 
 class Datastore(object):
 
-    def __init__(self, host, port, bucket, **kwargs):
-        connectionString = "http://%s:%s/%s" % (host, port, bucket)
+    def __init__(self, host, username, password, bucket, **kwargs):
+        cluster = Cluster('couchbase://%s' % host)
+        authenticator = PasswordAuthenticator(username, password)
+        cluster.authenticate(authenticator)
         kwargs['quiet'] = True
-        self.bucket = Bucket(connectionString, **kwargs)
+        self.bucket = cluster.open_bucket(bucket, **kwargs)
 
     def create(self, key, value, **kwargs):
         ro = self.bucket.insert(key, value, **kwargs)
