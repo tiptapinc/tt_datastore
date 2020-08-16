@@ -1,1 +1,1 @@
-couchbase==2.2.0
+couchbase==2.5.12

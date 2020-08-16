@@ -1,3 +1,9 @@
+## v0.0.15
+* allow connection kwargs when creating CouchbaseDatastore
+		- operation_timeout
+		- config_total_timeout
+		- config_node_timeout
+
 ## v0.0.14
 * remove NotFoundError again for couchbase 3.0
 
