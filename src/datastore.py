@@ -83,3 +83,12 @@ class Datastore(object):
 
     def design_create(self, name, ddoc, **kwargs):
         return self.bucket.bucket_manager().design_create(name, ddoc, **kwargs)
+
+    def n1ql_index_list(self):
+        return self.bucket.bucket_manager().n1ql_index_list()
+
+    def n1ql_index_create(self, ix, **kwargs):
+        return self.bucket.bucket_manager().n1ql_index_create(ix, **kwargs)
+
+    def n1ql_query(self, query):
+        return self.bucket.n1ql_query(query)

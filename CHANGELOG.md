@@ -1,3 +1,10 @@
+## v0.0.17
+* add n1ql_index_list method
+* add n1ql_index_create method
+
+## v0.0.16
+* add n1ql_query method
+
 ## v0.0.15
 * allow connection kwargs when creating CouchbaseDatastore
 		- operation_timeout
