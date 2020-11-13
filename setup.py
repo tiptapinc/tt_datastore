@@ -12,6 +12,5 @@ setup(
     version=open('VERSION').read().strip(),
     author='TipTap',
     install_requires=['couchbase==2.5.12'],
-    package_dir={'tt_datastore': 'src'},
     packages=['tt_datastore']
 )
