@@ -1,3 +1,9 @@
+## v0.0.19
+* use couchbase python SDK v3+
+
+## v0.0.18
+* updated directory structure
+
 ## v0.0.17
 * add n1ql_index_list method
 * add n1ql_index_create method

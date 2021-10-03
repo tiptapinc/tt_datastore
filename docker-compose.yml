@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  couchbase:
+    build: test_couchbase
+    ports:
+      - 8091-8094:8091-8094
+      - 11210:11210
+
+  tt_datastore:
+    build: .
+    volumes:
+      - ./tt_datastore:/tt_datastore
+      - ./tests:/tests
+
+    entrypoint: ["sh", "-c", "sleep infinity"]  # uncomment for debugging
