@@ -1,0 +1,11 @@
+test:
+  views:
+    test_1:
+      map: >
+              function (doc, meta) {
+                if (doc.docType) {
+                  emit(doc.docType, doc.phrase)
+                }
+              }
+  options:
+    updateMinChanges: 1

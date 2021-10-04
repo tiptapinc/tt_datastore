@@ -1,0 +1,8 @@
+couchbase>=3.0
+
+# for testing ...
+mock
+pytest
+pytest-cov
+pytest-tornado
+pyyaml
