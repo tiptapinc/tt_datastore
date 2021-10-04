@@ -31,7 +31,7 @@ class Datastore(object):
 
         queryStr = "&".join(connectArgs)
         if queryStr:
-            connectionString += "/?{0}".format(queryStr)
+            connectionString += "?{0}".format(queryStr)
 
         authenticator = PasswordAuthenticator(username, password)
         self.cluster = Cluster(connectionString, ClusterOptions(authenticator))

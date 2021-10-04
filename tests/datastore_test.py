@@ -65,6 +65,13 @@ def test_init_datastore(datastore):
     assert isinstance(datastore, Datastore)
 
 
+def test_operation_timeout():
+    ds = Datastore(
+        "couchbase", "Administrator", "password", "test", operation_timeout=20
+    )
+    assert isinstance(ds, Datastore)
+
+
 def test_delete(datastore):
     key = "test_delete"
     value = {"this": "doesn't matter"}
