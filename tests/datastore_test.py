@@ -57,7 +57,7 @@ def setup_bucket(datastore):
 
 @pytest.fixture()
 def design_doc():
-    with open("tests/test_design_doc.yml") as f:
+    with open("tests/design_doc.yml") as f:
         return yaml.safe_load(f)
 
 
