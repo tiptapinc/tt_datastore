@@ -2,7 +2,6 @@ from couchbase.cluster import Cluster, ClusterOptions, PasswordAuthenticator
 from couchbase.management.buckets import BucketManager
 from couchbase.management.queries import QueryIndexManager
 from couchbase.management.views import DesignDocument, DesignDocumentNamespace
-from couchbase.options import ClusterOptions
 import couchbase.exceptions
 import datetime
 
