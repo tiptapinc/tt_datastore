@@ -1,3 +1,6 @@
+## v0.0.20
+* update to work with couchbase version >= 4.0.0
+
 ## v0.0.19
 * use couchbase python SDK v3+
 
