@@ -1,7 +1,12 @@
-from couchbase.cluster import Cluster, ClusterOptions, PasswordAuthenticator
+from couchbase.auth import PasswordAuthenticator
+from couchbase.cluster import Cluster
 from couchbase.management.buckets import BucketManager
 from couchbase.management.queries import QueryIndexManager
-from couchbase.management.views import DesignDocument, DesignDocumentNamespace
+from couchbase.management.logic.view_index_logic import (
+    DesignDocument,
+    DesignDocumentNamespace
+)
+from couchbase.options import ClusterOptions
 import couchbase.exceptions
 import datetime
 
@@ -37,7 +42,7 @@ class Datastore(object):
         self.cluster = Cluster(connectionString, ClusterOptions(authenticator))
         self.bucket = self.cluster.bucket(bucket)
         self.viewManager = self.bucket.view_indexes()
-        self.bucketManager = BucketManager(self.bucket._admin)
+        # self.bucketManager = BucketManager(self.bucket._admin)
         self.queryManager = self.cluster.query_indexes()
         self.collection = self.cluster.bucket(bucket).default_collection()
 
