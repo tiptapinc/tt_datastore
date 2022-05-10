@@ -1,4 +1,4 @@
-couchbase>=4.0
+couchbase==3.2.7
 
 # for testing ...
 mock
