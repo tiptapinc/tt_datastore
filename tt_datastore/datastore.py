@@ -151,7 +151,7 @@ class Datastore(object):
         list(results)
 
     def n1ql_query(self, query):
-        return self.collection.query(query)
+        return self.cluster.query(query)
 
     def n1ql_index_drop(self, ix):
         if ix in [r['name'] for r in self.n1ql_index_list()]:
