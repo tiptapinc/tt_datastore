@@ -51,12 +51,18 @@ class Datastore(object):
         return result.success
 
     def read(self, key, **kwargs):
-        result = self.collection.get(key, quiet=True, **kwargs)
-        return result.content
+        try:
+            result = self.collection.get(key, **kwargs)
+            return result.content
+        except couchbase.exceptions.DocumentNotFoundException:
+            return
 
     def read_with_cas(self, key, **kwargs):
-        result = self.collection.get(key, quiet=True, **kwargs)
-        return result.content, result.cas
+        try:
+            result = self.collection.get(key, **kwargs)
+            return result.content, result.cas
+        except couchbase.exceptions.DocumentNotFoundException:
+            return None, None
 
     def lock(self, key, ttl=15, **kwargs):
         result = self.collection.get_and_lock(
@@ -65,7 +71,13 @@ class Datastore(object):
         return result.content, result.cas
 
     def unlock(self, key, cas):
-        self.collection.unlock(key, cas, quiet=True)
+        try:
+            self.collection.unlock(key, cas)
+        except (
+            couchbase.exceptions.DocumentNotFoundException,
+            couchbase.exceptions.DocumentLockedException
+        ):
+            continue
 
     def update(self, key, value, **kwargs):
         result = self.collection.replace(key, value, **kwargs)
@@ -90,8 +102,11 @@ class Datastore(object):
         return result.success, result.cas
 
     def delete(self, key, **kwargs):
-        result = self.collection.remove(key, quiet=True, **kwargs)
-        return result.success
+        try:
+            result = self.collection.remove(key, **kwargs)
+            return result.success
+        except couchbase.exceptions.DocumentNotFoundException:
+            return False
 
     def get_multi(self, keys, **kwargs):
         # returns a dictionary that maps keys to Couchbase GetResult
