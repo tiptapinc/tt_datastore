@@ -77,7 +77,7 @@ class Datastore(object):
             couchbase.exceptions.DocumentNotFoundException,
             couchbase.exceptions.DocumentLockedException
         ):
-            continue
+            return
 
     def update(self, key, value, **kwargs):
         result = self.collection.replace(key, value, **kwargs)
