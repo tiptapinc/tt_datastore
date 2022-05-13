@@ -303,8 +303,8 @@ def test_get_multi(datastore):
 
     multiResult = datastore.get_multi(keys)
 
-    resultsByKey = {k: v for k, v in multiResult.items()}
-    values = [r.content for r in resultsByKey.values()]
+    resultsByKey = {k: multiResult.results[k] for k in multiResult.results}
+    values = [r for r in resultsByKey.values()]
     assert len(values) == len(phrases)
     assert set(values) == set(values)
 
@@ -316,14 +316,16 @@ def test_get_multi(datastore):
 
 def test_design_create_and_get(datastore, design_doc):
     for docName, doc in design_doc.items():
-        datastore.design_create(docName, doc, use_devmode=False)
+        doc['name'] = docName
+        datastore.design_create(doc, use_devmode=False)
         result = datastore.design_get(docName, use_devmode=False)
         assert result['views'] == doc['views']
 
 
 def test_view(datastore, design_doc):
     doc = design_doc["test"]
-    datastore.design_create("test", doc, use_devmode=False)
+    doc['name'] = "test"
+    datastore.design_create(doc, use_devmode=False)
 
     rows = datastore.view("test", "test_1", key="dt1", stale=False)
     phrases = [row.value for row in rows]

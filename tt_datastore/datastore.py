@@ -42,7 +42,7 @@ class Datastore(object):
         self.cluster = Cluster(connectionString, ClusterOptions(authenticator))
         self.bucket = self.cluster.bucket(bucket)
         self.viewManager = self.bucket.view_indexes()
-        # self.bucketManager = BucketManager(self.bucket._admin)
+        self.bucketManager = self.cluster.buckets()
         self.queryManager = self.cluster.query_indexes()
         self.collection = self.cluster.bucket(bucket).default_collection()
 
@@ -71,13 +71,7 @@ class Datastore(object):
         return result.value, result.cas
 
     def unlock(self, key, cas):
-        try:
-            self.collection.unlock(key, cas)
-        except (
-            couchbase.exceptions.DocumentNotFoundException,
-            couchbase.exceptions.DocumentLockedException
-        ):
-            return
+        self.collection.unlock(key, cas)
 
     def update(self, key, value, **kwargs):
         result = self.collection.replace(key, value, **kwargs)
@@ -124,13 +118,13 @@ class Datastore(object):
         dd = self.viewManager.get_design_document(name, namespace, **kwargs)
         return dd.as_dict(namespace)
 
-    def design_create(self, name, ddoc, **kwargs):
+    def design_create(self, ddoc, **kwargs):
         if kwargs.pop('use_devmode', False):
             namespace = DesignDocumentNamespace.DEVELOPMENT
         else:
             namespace = DesignDocumentNamespace.PRODUCTION
 
-        ddoc = DesignDocument.from_json(name, **ddoc)
+        ddoc = DesignDocument.from_json(ddoc)
         self.viewManager.upsert_design_document(
             ddoc, namespace, **kwargs
         )
@@ -175,4 +169,4 @@ class Datastore(object):
             list(results)
 
     def flush_bucket(self):
-        return self.bucket.flush()
+        return self.bucketManager.flush_bucket(self.bucket.name)
