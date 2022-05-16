@@ -9,6 +9,7 @@ from couchbase.management.logic.view_index_logic import (
 from couchbase.options import ClusterOptions
 import couchbase.exceptions
 import datetime
+import json
 
 import logging
 log = logging.getLogger(__name__)
@@ -108,7 +109,36 @@ class Datastore(object):
         return self.collection.get_multi(keys, **kwargs)
 
     def view(self, design, view, **kwargs):
-        return self.bucket.view_query(design, view, **kwargs)
+        if kwargs.pop('use_devmode', False):
+            namespace = DesignDocumentNamespace.DEVELOPMENT
+        else:
+            namespace = DesignDocumentNamespace.PRODUCTION
+        kwargs['namespace'] = namespace
+
+        # couchbase v4 requires that the "key" option be json formatted, which
+        # is a breaking change from couchbase v3
+        for argname in ["key"]:
+            arg = kwargs.get(argname)
+            if arg:
+                try:
+                    json.loads(arg)
+                except json.JSONDecodeError:
+                    kwargs[argname] = json.dumps(arg)
+
+        # the response from bucket.view_query seems to have had a breaking
+        # change from v3 to v4, so instead of returning the response directly
+        # we return a backwards-compatible class that should work the same
+        # for our purposes.
+        class ViewRow(object):
+            def __init__(self, value, _id):
+                try:
+                    self.value = json.loads(value)
+                except json.JSONDecodeError:
+                    self.value = value
+                self.id = _id
+
+        rows = self.bucket.view_query(design, view, **kwargs)
+        return [ViewRow(row.value, row.id) for row in rows]
 
     def design_get(self, name, **kwargs):
         if kwargs.pop('use_devmode', False):
@@ -124,6 +154,10 @@ class Datastore(object):
         else:
             namespace = DesignDocumentNamespace.PRODUCTION
 
+        for k, v in ddoc.get('options', {}).items():
+            kwargs[k] = v
+
+        ddoc['namespace'] = namespace
         ddoc = DesignDocument.from_json(ddoc)
         self.viewManager.upsert_design_document(
             ddoc, namespace, **kwargs

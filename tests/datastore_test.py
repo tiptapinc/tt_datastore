@@ -1,5 +1,6 @@
 import pdb
 import pytest
+import time
 import yaml
 
 from tt_datastore import Datastore
@@ -327,7 +328,15 @@ def test_view(datastore, design_doc):
     doc['name'] = "test"
     datastore.design_create(doc, use_devmode=False)
 
+    # for some reason the "stale" option isn't getting passed so
+    # for now we're just making the view call twice to cause it
+    # to index
+    #
+    # definitely not cool
+    datastore.view("test", "test_1", key="dt1", stale=False)
+    time.sleep(1)
     rows = datastore.view("test", "test_1", key="dt1", stale=False)
+
     phrases = [row.value for row in rows]
     expectedPhrases = [
         doc["phrase"]
