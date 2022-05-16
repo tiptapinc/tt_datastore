@@ -148,7 +148,7 @@ class Datastore(object):
         dd = self.viewManager.get_design_document(name, namespace, **kwargs)
         return dd.as_dict(namespace)
 
-    def design_create(self, ddoc, **kwargs):
+    def design_create(self, name, ddoc, **kwargs):
         if kwargs.pop('use_devmode', False):
             namespace = DesignDocumentNamespace.DEVELOPMENT
         else:
@@ -158,6 +158,7 @@ class Datastore(object):
             kwargs[k] = v
 
         ddoc['namespace'] = namespace
+        ddoc['name'] = name
         ddoc = DesignDocument.from_json(ddoc)
         self.viewManager.upsert_design_document(
             ddoc, namespace, **kwargs

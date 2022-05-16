@@ -317,16 +317,14 @@ def test_get_multi(datastore):
 
 def test_design_create_and_get(datastore, design_doc):
     for docName, doc in design_doc.items():
-        doc['name'] = docName
-        datastore.design_create(doc, use_devmode=False)
+        datastore.design_create(docName, doc, use_devmode=False)
         result = datastore.design_get(docName, use_devmode=False)
         assert result['views'] == doc['views']
 
 
 def test_view(datastore, design_doc):
     doc = design_doc["test"]
-    doc['name'] = "test"
-    datastore.design_create(doc, use_devmode=False)
+    datastore.design_create("test", doc, use_devmode=False)
 
     # for some reason the "stale" option isn't getting passed so
     # for now we're just making the view call twice to cause it
