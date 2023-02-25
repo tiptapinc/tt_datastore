@@ -303,15 +303,14 @@ def test_get_multi(datastore):
 
     multiResult = datastore.get_multi(keys)
 
-    resultsByKey = {k: v for k, v in multiResult.items()}
-    values = [r.content for r in resultsByKey.values()]
+    values = [r.value for r in multiResult.results.values()]
     assert len(values) == len(phrases)
     assert set(values) == set(values)
 
-    casses = [r.cas for r in resultsByKey.values()]
+    casses = [r.cas for r in multiResult.results.values()]
     assert len(casses) == len(keys)
 
-    assert set(resultsByKey.keys()) == set(keys)
+    assert set(multiResult.results.keys()) == set(keys)
 
 
 def test_design_create_and_get(datastore, design_doc):
@@ -322,6 +321,7 @@ def test_design_create_and_get(datastore, design_doc):
 
 
 def test_view(datastore, design_doc):
+    pdb.set_trace()
     doc = design_doc["test"]
     datastore.design_create("test", doc, use_devmode=False)
 

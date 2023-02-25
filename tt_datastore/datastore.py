@@ -1,5 +1,7 @@
-from couchbase.cluster import Cluster, ClusterOptions, PasswordAuthenticator
-from couchbase.management.buckets import BucketManager
+from couchbase.auth import PasswordAuthenticator
+from couchbase.cluster import Cluster
+from couchbase.options import ClusterOptions
+# from couchbase.management.buckets import BucketManager
 from couchbase.management.queries import QueryIndexManager
 from couchbase.management.views import DesignDocument, DesignDocumentNamespace
 import couchbase.exceptions
@@ -37,7 +39,7 @@ class Datastore(object):
         self.cluster = Cluster(connectionString, ClusterOptions(authenticator))
         self.bucket = self.cluster.bucket(bucket)
         self.viewManager = self.bucket.view_indexes()
-        self.bucketManager = BucketManager(self.bucket._admin)
+        # self.bucketManager = BucketManager(self.bucket._admin)
         self.queryManager = self.cluster.query_indexes()
         self.collection = self.cluster.bucket(bucket).default_collection()
 
@@ -46,21 +48,35 @@ class Datastore(object):
         return result.success
 
     def read(self, key, **kwargs):
-        result = self.collection.get(key, quiet=True, **kwargs)
-        return result.content
+        # catch exceptions to emulate the old "quiet=True" behavior
+        try:
+            result = self.collection.get(key, **kwargs)
+        except couchbase.exceptions.DocumentNotFoundException:
+            return {}
+
+        return result.value
 
     def read_with_cas(self, key, **kwargs):
-        result = self.collection.get(key, quiet=True, **kwargs)
-        return result.content, result.cas
+        # catch exceptions to emulate the old "quiet=True" behavior
+        try:
+            result = self.collection.get(key, **kwargs)
+        except couchbase.exceptions.DocumentNotFoundException:
+            return {}, None
+
+        return result.value, result.cas
 
     def lock(self, key, ttl=15, **kwargs):
         result = self.collection.get_and_lock(
             key, datetime.timedelta(seconds=ttl), **kwargs
         )
-        return result.content, result.cas
+        return result.value, result.cas
 
     def unlock(self, key, cas):
-        self.collection.unlock(key, cas, quiet=True)
+        # catch exceptions to emulate the old "quiet=True" behavior
+        try:
+            self.collection.unlock(key, cas)
+        except couchbase.exceptions.DocumentNotFoundException:
+            pass
 
     def update(self, key, value, **kwargs):
         result = self.collection.replace(key, value, **kwargs)
@@ -85,7 +101,12 @@ class Datastore(object):
         return result.success, result.cas
 
     def delete(self, key, **kwargs):
-        result = self.collection.remove(key, quiet=True, **kwargs)
+        # catch exceptions to emulate the old "quiet=True" behavior
+        try:
+            result = self.collection.remove(key, **kwargs)
+        except couchbase.exceptions.DocumentNotFoundException:
+            return False
+
         return result.success
 
     def get_multi(self, keys, **kwargs):
@@ -94,7 +115,15 @@ class Datastore(object):
         return self.collection.get_multi(keys, **kwargs)
 
     def view(self, design, view, **kwargs):
-        return self.bucket.view_query(design, view, **kwargs)
+        if 'stale' in kwargs:
+            stale = kwargs['stale']
+            if isinstance(stale, bool) and stale is False:
+                kwargs['scan_consistency'] = "false"
+            elif isinstance(stale, str) and stale.lower() in ["ok", "update_after", "false"]:
+                kwargs['scan_consistency'] = stale.lower()
+            del kwargs['stale']
+
+        return self.bucket.view_query(design, view, **kwargs).rows()
 
     def design_get(self, name, **kwargs):
         if kwargs.pop('use_devmode', False):
@@ -106,11 +135,14 @@ class Datastore(object):
 
     def design_create(self, name, ddoc, **kwargs):
         if kwargs.pop('use_devmode', False):
+            ddoc['namespace'] = "development"
             namespace = DesignDocumentNamespace.DEVELOPMENT
         else:
+            ddoc['namespace'] = "production"
             namespace = DesignDocumentNamespace.PRODUCTION
 
-        ddoc = DesignDocument.from_json(name, **ddoc)
+        ddoc['name'] = name
+        ddoc = DesignDocument.from_json(ddoc)
         self.viewManager.upsert_design_document(
             ddoc, namespace, **kwargs
         )
@@ -146,7 +178,7 @@ class Datastore(object):
         list(results)
 
     def n1ql_query(self, query):
-        return self.collection.query(query)
+        return self.cluster.query(query)
 
     def n1ql_index_drop(self, ix):
         if ix in [r['name'] for r in self.n1ql_index_list()]:
@@ -155,4 +187,4 @@ class Datastore(object):
             list(results)
 
     def flush_bucket(self):
-        return self.bucket.flush()
+        return self.cluster.buckets().flush_bucket(self.bucket.name)
