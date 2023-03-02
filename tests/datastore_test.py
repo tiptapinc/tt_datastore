@@ -321,7 +321,6 @@ def test_design_create_and_get(datastore, design_doc):
 
 
 def test_view(datastore, design_doc):
-    pdb.set_trace()
     doc = design_doc["test"]
     datastore.design_create("test", doc, use_devmode=False)
 

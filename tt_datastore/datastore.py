@@ -1,11 +1,11 @@
 from couchbase.auth import PasswordAuthenticator
 from couchbase.cluster import Cluster
 from couchbase.options import ClusterOptions
-# from couchbase.management.buckets import BucketManager
 from couchbase.management.queries import QueryIndexManager
 from couchbase.management.views import DesignDocument, DesignDocumentNamespace
 import couchbase.exceptions
 import datetime
+import json
 
 import logging
 log = logging.getLogger(__name__)
@@ -39,7 +39,6 @@ class Datastore(object):
         self.cluster = Cluster(connectionString, ClusterOptions(authenticator))
         self.bucket = self.cluster.bucket(bucket)
         self.viewManager = self.bucket.view_indexes()
-        # self.bucketManager = BucketManager(self.bucket._admin)
         self.queryManager = self.cluster.query_indexes()
         self.collection = self.cluster.bucket(bucket).default_collection()
 
@@ -115,6 +114,8 @@ class Datastore(object):
         return self.collection.get_multi(keys, **kwargs)
 
     def view(self, design, view, **kwargs):
+        # "stale" keyword argument changed to "scan_consistency" for couchbase
+        # SDK 4.xx
         if 'stale' in kwargs:
             stale = kwargs['stale']
             if isinstance(stale, bool) and stale is False:
@@ -123,7 +124,28 @@ class Datastore(object):
                 kwargs['scan_consistency'] = stale.lower()
             del kwargs['stale']
 
-        return self.bucket.view_query(design, view, **kwargs).rows()
+        # couchbase SDK 4.xx doesn't deserialize row.value and row.id, whereas
+        # older couchbase SDKs did. For compatibility purposes return something
+        # that looks like the old SDK's result
+        class OldStyleRow(object):
+            def __init__(self, raw_row):
+                try:
+                    self.key = json.loads(raw_row.key)
+                except json.decoder.JSONDecodeError:
+                    self.key = raw_row.key
+
+                self.id = raw_row.id
+
+                try:
+                    self.value = json.loads(raw_row.value)
+                except json.decoder.JSONDecodeError:
+                    self.value = raw_row.value
+
+                self.document = raw_row.document
+
+        raw_rows = self.bucket.view_query(design, view, **kwargs).rows()
+        rows = [OldStyleRow(raw_row) for raw_row in raw_rows]
+        return rows
 
     def design_get(self, name, **kwargs):
         if kwargs.pop('use_devmode', False):
