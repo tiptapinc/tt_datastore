@@ -1,5 +1,4 @@
-couchbase==3.2.7
-
+-e git+https://github.com/tiptapinc/couchbase-python-client.git@dev#egg=couchbase
 # for testing ...
 mock
 pytest
