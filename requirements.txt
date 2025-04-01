@@ -1,4 +1,4 @@
--e git+https://github.com/tiptapinc/couchbase-python-client.git@dev#egg=couchbase
+-e git+https://github.com/tiptapinc/couchbase-python-client.git@3.2.7
 # for testing ...
 mock
 pytest
