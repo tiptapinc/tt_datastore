@@ -1,4 +1,4 @@
--e git+https://github.com/tiptapinc/couchbase-python-client.git@dev#egg=couchbase
+https://raw.githubusercontent.com/tiptapinc/couchbase-wheel/master/couchbase-3.2.7-cp37-cp37m-linux_x86_64.whl
 # for testing ...
 mock
 pytest
