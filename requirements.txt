@@ -1,4 +1,4 @@
-https://raw.githubusercontent.com/tiptapinc/couchbase-wheel/master/couchbase-3.2.7-cp38-cp38-linux_x86_64.whl
+https://raw.githubusercontent.com/tiptapinc/couchbase-wheel/master/couchbase-3.2.7-cp310-cp310-linux_x86_64.whl
 # for testing ...
 mock
 pytest
