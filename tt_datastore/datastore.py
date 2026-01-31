@@ -3,7 +3,8 @@ from couchbase.auth import PasswordAuthenticator
 # from couchbase.management.buckets import BucketManager
 from couchbase.management.logic.view_index_logic import (
     DesignDocument,
-    DesignDocumentNamespace
+    DesignDocumentNamespace,
+    View
 )
 from couchbase.options import ClusterOptions
 import couchbase.exceptions
@@ -110,9 +111,18 @@ class Datastore(object):
         else:
             namespace = DesignDocumentNamespace.PRODUCTION
 
-        ddoc = DesignDocument.from_json(name, **ddoc)
+        designDoc = None
+        for viewName in ddoc['views']:
+            if designDoc:
+                view = View(ddoc['views'][viewName]['map'])
+                designDoc.add_view(viewName, view)
+            else:
+                view = {viewName: View(ddoc['views'][viewName]['map'])}
+                designDoc = DesignDocument(name, view)
+
+        # ddoc = DesignDocument.from_json(name, ddoc)
         self.viewManager.upsert_design_document(
-            ddoc, namespace, **kwargs
+            designDoc, namespace, **kwargs
         )
 
     def n1ql_index_list(self):
