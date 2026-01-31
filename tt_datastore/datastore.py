@@ -1,6 +1,6 @@
 from couchbase.cluster import Cluster
 from couchbase.auth import PasswordAuthenticator
-from couchbase.management.buckets import BucketManager
+# from couchbase.management.buckets import BucketManager
 from couchbase.management.logic.view_index_logic import (
     DesignDocument,
     DesignDocumentNamespace
@@ -23,25 +23,21 @@ CONNECTION_KWARGS = [
 class Datastore(object):
     casException = couchbase.exceptions.CASMismatchException
     lockedException = couchbase.exceptions.DocumentLockedException
-
     def __init__(self, host, username, password, bucket, **kwargs):
         connectionString = "couchbase://{0}".format(host)
-
         connectArgs = []
         for arg in CONNECTION_KWARGS:
             value = kwargs.pop(arg, None)
             if value:
                 connectArgs.append("{0}={1}".format(arg, value))
-
         queryStr = "&".join(connectArgs)
         if queryStr:
             connectionString += "?{0}".format(queryStr)
-
         authenticator = PasswordAuthenticator(username, password)
         self.cluster = Cluster(connectionString, ClusterOptions(authenticator))
         self.bucket = self.cluster.bucket(bucket)
         self.viewManager = self.bucket.view_indexes()
-        self.bucketManager = BucketManager(self.bucket._admin)
+        # self.bucketManager = BucketManager(self.bucket._admin)
         self.queryManager = self.cluster.query_indexes()
         self.collection = self.cluster.bucket(bucket).default_collection()
 
@@ -150,7 +146,7 @@ class Datastore(object):
         list(results)
 
     def n1ql_query(self, query):
-        return self.collection.query(query)
+        return self.cluster.query(query)
 
     def n1ql_index_drop(self, ix):
         if ix in [r['name'] for r in self.n1ql_index_list()]:
