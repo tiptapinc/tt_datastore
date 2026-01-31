@@ -50,14 +50,14 @@ class Datastore(object):
     def read(self, key, **kwargs):
         try:
             result = self.collection.get(key, quiet=True, **kwargs)
-            return result.content
+            return result.value
         except couchbase.exceptions.DocumentNotFoundException:
             return None, None
 
     def read_with_cas(self, key, **kwargs):
         try:
             result = self.collection.get(key, quiet=True, **kwargs)
-            return result.content, result.cas
+            return result.value, result.cas
         except couchbase.exceptions.DocumentNotFoundException:
             return None, None
 
@@ -66,7 +66,7 @@ class Datastore(object):
             result = self.collection.get_and_lock(
                 key, datetime.timedelta(seconds=ttl), **kwargs
             )
-            return result.content, result.cas
+            return result.value, result.cas
         except couchbase.exceptions.DocumentNotFoundException:
             return None, None
 
