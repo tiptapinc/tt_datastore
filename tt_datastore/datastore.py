@@ -24,6 +24,7 @@ CONNECTION_KWARGS = [
 class Datastore(object):
     casException = couchbase.exceptions.CASMismatchException
     lockedException = couchbase.exceptions.DocumentLockedException
+
     def __init__(self, host, username, password, bucket, **kwargs):
         connectionString = "couchbase://{0}".format(host)
         connectArgs = []
@@ -47,18 +48,27 @@ class Datastore(object):
         return result.success
 
     def read(self, key, **kwargs):
-        result = self.collection.get(key, quiet=True, **kwargs)
-        return result.content
+        try:
+            result = self.collection.get(key, quiet=True, **kwargs)
+            return result.content
+        except couchbase.exceptions.DocumentNotFoundException:
+            return None, None
 
     def read_with_cas(self, key, **kwargs):
-        result = self.collection.get(key, quiet=True, **kwargs)
-        return result.content, result.cas
+        try:
+            result = self.collection.get(key, quiet=True, **kwargs)
+            return result.content, result.cas
+        except couchbase.exceptions.DocumentNotFoundException:
+            return None, None
 
     def lock(self, key, ttl=15, **kwargs):
-        result = self.collection.get_and_lock(
-            key, datetime.timedelta(seconds=ttl), **kwargs
-        )
-        return result.content, result.cas
+        try:
+            result = self.collection.get_and_lock(
+                key, datetime.timedelta(seconds=ttl), **kwargs
+            )
+            return result.content, result.cas
+        except couchbase.exceptions.DocumentNotFoundException:
+            return None, None
 
     def unlock(self, key, cas):
         self.collection.unlock(key, cas, quiet=True)
