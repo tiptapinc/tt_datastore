@@ -52,7 +52,7 @@ class Datastore(object):
             result = self.collection.get(key, quiet=True, **kwargs)
             return result.value
         except couchbase.exceptions.DocumentNotFoundException:
-            return None, None
+            return None
 
     def read_with_cas(self, key, **kwargs):
         try:
