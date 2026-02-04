@@ -1,12 +1,13 @@
 from couchbase.cluster import Cluster
 from couchbase.auth import PasswordAuthenticator
+
 # from couchbase.management.buckets import BucketManager
 from couchbase.management.logic.view_index_logic import (
     DesignDocument,
     DesignDocumentNamespace,
     View
 )
-from couchbase.options import ClusterOptions
+from couchbase.options import ClusterOptions, ReplaceOptions
 import couchbase.exceptions
 import datetime
 
@@ -74,11 +75,11 @@ class Datastore(object):
         self.collection.unlock(key, cas, quiet=True)
 
     def update(self, key, value, **kwargs):
-        result = self.collection.replace(key, value, **kwargs)
+        result = self.collection.replace(key, value, ReplaceOptions(**kwargs))
         return result.success
 
     def update_with_cas(self, key, value, **kwargs):
-        result = self.collection.replace(key, value, **kwargs)
+        result = self.collection.replace(key, value, ReplaceOptions(**kwargs))
         return result.success, result.cas
 
     def set(self, key, value, **kwargs):
@@ -90,7 +91,7 @@ class Datastore(object):
         # on incorrect CAS, so we need to create our own upsert using
         # replace
         try:
-            result = self.collection.replace(key, value, **kwargs)
+            result = self.collection.replace(key, value, ReplaceOptions(**kwargs))
         except couchbase.exceptions.DocumentNotFoundException:
             result = self.collection.insert(key, value, **kwargs)
         return result.success, result.cas
